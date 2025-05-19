@@ -22,16 +22,21 @@ def run_ocr_merge(cmd, window, output_key):
         window[output_key].print(f'実行時エラー: {e}')
 
 def main():
+    # 1回目のフォーム入力
     form = eg.popup_get_form([
         ("画像ディレクトリ", "", "folder"),
         ("出力ディレクトリ", "", "folder"),
-        ("出力PDFファイル名（拡張子.pdf省略可）", "output"),
+        ("出力PDFファイル名（拡張子省略）", "output"),
     ], title="OCR画像PDF結合ツール")
     if not form:
         return
     input_dir = form["画像ディレクトリ"]
     output_dir = form["出力ディレクトリ"]
-    output_name = form["出力PDFファイル名（拡張子.pdf省略可）"].strip()
+    output_name = form["出力PDFファイル名（拡張子省略）"].strip()
+
+    # 「出力ディレクトリ」が空欄のまま実行されたなら「画像ディレクトリ」と同じにする
+    if input_dir and not output_dir:
+        output_dir = input_dir
     if not input_dir:
         eg.popup_error('画像ディレクトリが選択されていません')
         return
