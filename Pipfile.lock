@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "307295bdd74059f8aec331036fb85adf17c00d6dd7cc5565d37183c501362646"
+            "sha256": "fb4fc4c257b1f56012d08719c8050a26c8f2769ad8b2dbd1bf99b86eccd18b69"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -196,6 +196,21 @@
             "markers": "python_version >= '3.6'",
             "version": "==3.0.1"
         },
+        "pyperclip": {
+            "hashes": [
+                "sha256:b7de0142ddc81bfc5c7507eea19da920b92252b548b96186caf94a5e2527d310"
+            ],
+            "version": "==1.9.0"
+        },
+        "pysimplegui": {
+            "hashes": [
+                "sha256:4c77436f527b6ee5c6e097a07028c83d85dc2513bcb51b78c9bfcc1b55123bd1",
+                "sha256:67e35ad6dd76e9369051261114f4711308e87815a0488f7fa28b37c29a546f8b"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.6'",
+            "version": "==5.0.8.3"
+        },
         "pytesseract": {
             "hashes": [
                 "sha256:4bf5f880c99406f52a3cfc2633e42d9dc67615e69d8a509d74867d3baddb5db9",
@@ -204,6 +219,15 @@
             "index": "pypi",
             "markers": "python_version >= '3.8'",
             "version": "==0.3.13"
+        },
+        "tkeasygui": {
+            "hashes": [
+                "sha256:1208eb6154ae50facc88b4112a24f8f27412fc436f11af249e965904e56a674f",
+                "sha256:8a7f916f3b236ed8d5b25270ce98f46a00cef2636bbf3efa94f75a6ebf6350e5"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.9'",
+            "version": "==1.0.37"
         }
     },
     "develop": {}

@@ -48,16 +48,40 @@ pipenv install
 pipenv install pillow pytesseract PyPDF2 opencv-python
 ```
 
+
 1. **使い方**
+
+### コマンドライン版
 
 ```sh
 pipenv run python ocr_merge.py -i 画像ディレクトリ -o 出力PDFファイル名.pdf
 ```
 
-## オプション
+### GUI版（TkEasyGUI）
+
+まず依存パッケージをインストールしてください:
+
+```sh
+pipenv install TkEasyGUI
+```
+
+GUIを起動:
+
+```sh
+pipenv run python ocr_merge_gui.py
+```
+
+画面の指示に従い「画像ディレクトリ」と「出力PDFファイル名」を指定してください。
+
+※ macOSでtkinterが無い場合は `brew install python-tk` でインストールしてください。
+
+
+## オプション（コマンドライン版）
 - `-i` : 画像ファイルのディレクトリ
 - `-o` : 出力PDFファイル名
 
 ## 注意
 - Tesseractの日本語OCRパッケージが正しくインストールされていることを確認してください。
 - 画像の自動回転補正やエラーハンドリングも実装済みです。
+- GUI版はPythonのtkinterが必要です。macOSでエラーが出る場合は `brew install python-tk` でインストールしてください。
+- GUIフレームワークはTkEasyGUIを使用しています。
