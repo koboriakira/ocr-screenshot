@@ -71,12 +71,15 @@ def main():
     temp_dir = tempfile.mkdtemp()
     pdf_paths = []
     try:
+        total = len(files)
+        print(f'処理開始: {total}枚の画像')
         for idx, img_path in enumerate(files):
             pdf_path = os.path.join(temp_dir, f'{idx:04d}.pdf')
-            print(f'OCR処理中: {img_path}')
+            print(f'[{idx+1}/{total}] OCR処理中: {os.path.basename(img_path)}')
             image_to_pdf_with_ocr(img_path, pdf_path, rotate=rotate)
+            print(f'[{idx+1}/{total}] 完了: {os.path.basename(img_path)}')
             pdf_paths.append(pdf_path)
-        # PDF結合
+        print('PDF結合中...')
         merger = PdfMerger()
         for pdf in pdf_paths:
             merger.append(pdf)
