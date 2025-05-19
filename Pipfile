@@ -9,6 +9,7 @@ pytesseract = "*"
 PyPDF2 = "*"
 opencv-python = "*"
 tkeasygui = "*"
+pyinstaller = "*"
 
 [dev-packages]
 
