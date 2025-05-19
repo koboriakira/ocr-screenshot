@@ -6,18 +6,26 @@ import TkEasyGUI as eg
 def main():
     form = eg.popup_get_form([
         ("画像ディレクトリ", "", "folder"),
-        ("出力PDFファイル名", "", "file"),
+        ("出力ディレクトリ", "", "folder"),
+        ("出力PDFファイル名（拡張子.pdf省略可）", "output"),
     ], title="OCR画像PDF結合ツール")
     if not form:
         return
     input_dir = form["画像ディレクトリ"]
-    output_pdf = form["出力PDFファイル名"]
+    output_dir = form["出力ディレクトリ"]
+    output_name = form["出力PDFファイル名（拡張子.pdf省略可）"].strip()
     if not input_dir:
         eg.popup_error('画像ディレクトリが選択されていません')
         return
-    if not output_pdf:
+    if not output_dir:
+        eg.popup_error('出力ディレクトリが選択されていません')
+        return
+    if not output_name:
         eg.popup_error('出力PDFファイル名が指定されていません')
         return
+    if not output_name.lower().endswith('.pdf'):
+        output_name += '.pdf'
+    output_pdf = eg.os_path_join(output_dir, output_name) if hasattr(eg, 'os_path_join') else __import__('os').path.join(output_dir, output_name)
     eg.popup(f'画像ディレクトリ: {input_dir}\n出力PDF: {output_pdf}', title="確認")
     cmd = [sys.executable, 'ocr_merge.py', '-i', input_dir, '-o', output_pdf]
     eg.popup(f'実行: {cmd}', title="実行コマンド")
