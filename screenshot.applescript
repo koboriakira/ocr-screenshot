@@ -1,24 +1,23 @@
-set HOME_DIR to POSIX path of (path to home folder)
-property DEFAULT_SUBDIR : "CIOƒnƒ“ƒhƒuƒbƒN"
-property DEFAULT_BASESUBDIR : "Documents/KindleOCR"
+-- ä¿å­˜å…ˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªï¼ˆå…±é€šéƒ¨åˆ†ã¨ã‚µãƒ–ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã«åˆ†å‰²ï¼‰
+property DEFAULT_SUBDIR : "ãƒ–ãƒ©ãƒƒã‚¯ãƒ»ã‚«ãƒ«ãƒãƒ£ãƒ¼"
+property DEFAULT_BASEDIR : "/Users/koboriakira/Documents/KindleOCR"
 
--- ƒy[ƒW”
-property DEFAULT_PAGES : 233
+-- ãƒšãƒ¼ã‚¸æ•°
+property DEFAULT_PAGES : 219
 
--- ‚ß‚­‚è•ûŒü
+-- ã‚ãã‚Šæ–¹å‘
 property PAGE_LEFT : 1
 property PAGE_RIGHT : 2
 set pagedir to PAGE_LEFT
 
--- ˆÈ~‚Í•ÏX•s—v
+-- ä»¥é™ã¯å¤‰æ›´ä¸è¦
 
-set DEFAULT_BASEDIR to HOME_DIR & DEFAULT_BASESUBDIR
-set DEFAULT_SAVEPATH to DEFAULT_BASEDIR & "/" & DEFAULT_SUBDIR & "/"
+property DEFAULT_SAVEPATH : DEFAULT_BASEDIR & "/" & DEFAULT_SUBDIR & "/"
 
 set pages to DEFAULT_PAGES
 set target to "Kindle"
 set savepath to DEFAULT_SAVEPATH
--- •Û‘¶æƒfƒBƒŒƒNƒgƒŠ‚ª‘¶İ‚µ‚È‚¢ê‡‚Íì¬
+-- ä¿å­˜å…ˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãŒå­˜åœ¨ã—ãªã„å ´åˆã¯ä½œæˆ
 do shell script "mkdir -p " & quoted form of savepath
 set spage to 1
 set pausetime to 1.0
@@ -41,7 +40,7 @@ end if
 delay pausetime
 
 repeat with i from spage to pages
-	-- 3ƒPƒ^ƒ[ƒƒpƒfƒBƒ“ƒOˆ—
+	-- 3ã‚±ã‚¿ã‚¼ãƒ­ãƒ‘ãƒ‡ã‚£ãƒ³ã‚°å‡¦ç†
 	set numText to i as string
 	if i < 10 then
 		set dp to "00" & numText
