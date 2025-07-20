@@ -16,6 +16,8 @@ property DEFAULT_SAVEPATH : DEFAULT_BASEDIR & "/" & DEFAULT_SUBDIR & "/"
 set pages to DEFAULT_PAGES
 set target to "Kindle"
 set savepath to DEFAULT_SAVEPATH
+-- 保存先ディレクトリが存在しない場合は作成
+do shell script "mkdir -p " & quoted form of savepath
 set spage to 1
 set pagedir to PAGE_RIGHT
 set pausetime to 1.0
