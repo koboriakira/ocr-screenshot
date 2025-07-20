@@ -3,14 +3,14 @@ property DEFAULT_SUBDIR : "CIOハンドブック"
 property DEFAULT_BASESUBDIR : "Documents/KindleOCR"
 
 -- ページ数
-property DEFAULT_PAGES : 320
+property DEFAULT_PAGES : 233
 
 -- めくり方向
 property PAGE_LEFT : 1
 property PAGE_RIGHT : 2
+set pagedir to PAGE_LEFT
 
 -- 以降は変更不要
-
 
 set DEFAULT_BASEDIR to HOME_DIR & DEFAULT_BASESUBDIR
 set DEFAULT_SAVEPATH to DEFAULT_BASEDIR & "/" & DEFAULT_SUBDIR & "/"
@@ -21,7 +21,6 @@ set savepath to DEFAULT_SAVEPATH
 -- 保存先ディレクトリが存在しない場合は作成
 do shell script "mkdir -p " & quoted form of savepath
 set spage to 1
-set pagedir to PAGE_RIGHT
 set pausetime to 1.0
 set cropx to 0
 set cropy to 0
