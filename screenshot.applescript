@@ -1,5 +1,6 @@
--- 保存先ディレクトリ
-property DEFAULT_SAVEPATH : "/Users/koboriakira/Documents/KindleOCR/CIOハンドブック/"
+-- 保存先ディレクトリ（共通部分とサブディレクトリに分割）
+property DEFAULT_SUBDIR : "CIOハンドブック"
+property DEFAULT_BASEDIR : "/Users/koboriakira/Documents/KindleOCR"
 
 -- ページ数
 property DEFAULT_PAGES : 320
@@ -9,6 +10,8 @@ property PAGE_LEFT : 1
 property PAGE_RIGHT : 2
 
 -- 以降は変更不要
+
+property DEFAULT_SAVEPATH : DEFAULT_BASEDIR & "/" & DEFAULT_SUBDIR & "/"
 
 set pages to DEFAULT_PAGES
 set target to "Kindle"
