@@ -1,12 +1,17 @@
-# OCR画像PDF結合ツール
+# OCR画像PDF結合・PDF分割ツール
 
-このツールは、指定したディレクトリ内の画像ファイル（JPEG/PNG等）を日本語・英語OCRでテキスト検索可能なPDFに変換し、1つのPDFファイルに結合します。
+このツールセットは以下の機能を提供します：
+
+1. **OCR画像PDF結合**: 指定したディレクトリ内の画像ファイル（JPEG/PNG等）を日本語・英語OCRでテキスト検索可能なPDFに変換し、1つのPDFファイルに結合
+2. **PDF分割**: 任意のPDFファイルを指定したサイズ以下（デフォルト30MB）に分割
 
 ## 特徴
 - 100枚以上の画像にも対応
 - 画像ファイル名の昇順で結合
+- PDFサイズベース分割機能
 - Mac/Linux対応
 - pipenvによる依存管理
+- GUI版とコマンドライン版の両方をサポート
 
 ## 必要な環境
 - Python 3.13以上
@@ -49,16 +54,42 @@ pipenv install pillow pytesseract PyPDF2 opencv-python
 ```
 
 
-1. **使い方**
+## 使い方
 
-### コマンドライン版
+### 1. OCR画像PDF結合機能
+
+#### コマンドライン版
 
 ```sh
 pipenv run python ocr_merge.py -i 画像ディレクトリ -o 出力PDFファイル名.pdf
 ```
 
+#### オプション
+- `-i` : 画像ファイルのディレクトリ
+- `-o` : 出力PDFファイル名
+- `--no-rotate` : 自動回転補正を無効化
 
-### GUI版（TkEasyGUI）
+### 2. PDF分割機能
+
+#### コマンドライン版
+
+```sh
+# 30MB以下に分割（デフォルト）
+pipenv run python pdf_split.py -i input.pdf
+
+# 50MB以下に分割
+pipenv run python pdf_split.py -i input.pdf -s 50
+
+# 出力ディレクトリを指定
+pipenv run python pdf_split.py -i input.pdf -o /path/to/output
+```
+
+#### オプション
+- `-i` : 入力PDFファイルのパス
+- `-s` : 最大ファイルサイズ（MB、デフォルト: 30）
+- `-o` : 出力ディレクトリ（省略時は入力ファイルと同じディレクトリ）
+
+### 3. GUI版（TkEasyGUI）
 
 #### 1. Pythonスクリプトとして使う場合
 
@@ -68,44 +99,54 @@ pipenv run python ocr_merge.py -i 画像ディレクトリ -o 出力PDFファイ
 pipenv install TkEasyGUI
 ```
 
-GUIを起動:
-
+##### OCR画像PDF結合のみ
 ```sh
 pipenv run python ocr_merge_gui.py
 ```
 
-画面の指示に従い「画像ディレクトリ」と「出力PDFファイル名」を指定してください。
+##### 機能選択GUI（OCR結合 or PDF分割）
+```sh
+pipenv run python pdf_split_gui.py
+```
+
+画面の指示に従ってファイル・ディレクトリを選択し、オプションを設定してください。
 
 ※ macOSでtkinterが無い場合は `brew install python-tk` でインストールしてください。
 
 #### 2. スタンドアロン実行ファイルとして使う場合（macOS）
 
-PyInstallerでビルド済みの `dist/ocr_merge_gui` または `dist/ocr_merge_gui.app` を配布・利用できます。
+PyInstallerで実行ファイルを作成できます。
 
-- `ocr_merge_gui` … ターミナルから実行できるバイナリ
-- `ocr_merge_gui.app` … Finderからダブルクリックで起動できるアプリ
-
-**注意:**
-- `ocr_merge.py` も同じディレクトリにコピーしてください（内部で呼び出します）
-- Tesseract本体（`brew install tesseract`）は各自インストールが必要です
-- 初回起動時、Gatekeeperの警告が出る場合は「右クリック→開く」で回避できます
-
-自分でビルドする場合は以下のコマンドを実行してください:
-
+##### ビルド方法
 ```sh
 pipenv install pyinstaller
+
+# OCR結合GUI
 pipenv run pyinstaller --onefile --windowed ocr_merge_gui.py
+
+# 機能選択GUI（OCR結合 + PDF分割）
+pipenv run pyinstaller --onefile --windowed pdf_split_gui.py
 ```
 
 ビルド後、`dist/` フォルダ内に実行ファイルが生成されます。
 
+**注意:**
+- OCR機能を使う場合は関連スクリプト（`ocr_merge.py`）も同じディレクトリにコピーしてください
+- PDF分割機能を使う場合は `pdf_split.py` も同じディレクトリにコピーしてください
+- Tesseract本体（`brew install tesseract`）は各自インストールが必要です（OCR機能使用時）
+- 初回起動時、Gatekeeperの警告が出る場合は「右クリック→開く」で回避できます
 
-## オプション（コマンドライン版）
-- `-i` : 画像ファイルのディレクトリ
-- `-o` : 出力PDFファイル名
+## 注意事項
 
-## 注意
-- Tesseractの日本語OCRパッケージが正しくインストールされていることを確認してください。
-- 画像の自動回転補正やエラーハンドリングも実装済みです。
-- GUI版はPythonのtkinterが必要です。macOSでエラーが出る場合は `brew install python-tk` でインストールしてください。
-- GUIフレームワークはTkEasyGUIを使用しています。
+### OCR機能について
+- Tesseractの日本語OCRパッケージが正しくインストールされていることを確認してください
+- 画像の自動回転補正やエラーハンドリングも実装済みです
+
+### PDF分割機能について
+- 分割されたファイルは `元ファイル名_part01.pdf`, `元ファイル名_part02.pdf` のような連番で保存されます
+- ページ単位での分割のため、1ページが指定サイズを超える場合はそのページだけで1ファイルになります
+- PDF分割機能にはTesseractは不要です
+
+### GUI版について
+- Pythonのtkinterが必要です。macOSでエラーが出る場合は `brew install python-tk` でインストールしてください
+- GUIフレームワークはTkEasyGUIを使用しています

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pipenv run python:*)"
+    ],
+    "deny": []
+  }
+}
