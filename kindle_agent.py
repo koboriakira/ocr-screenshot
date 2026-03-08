@@ -28,8 +28,8 @@ def _write_applescript(content: str) -> None:
         f.write(content)
 
 
-def edit_applescript(book_name: str, num_pages: int, page_direction: str) -> None:
-    """AppleScriptの設定値を書き換える。"""
+def edit_applescript(book_name: str, page_direction: str, num_pages: int | None = None) -> None:
+    """AppleScriptの設定値を書き換える。num_pages=None のときは現在値を維持する。"""
     content = _read_applescript()
 
     # DEFAULT_SUBDIR（書籍名 = 保存サブディレクトリ）
@@ -39,12 +39,13 @@ def edit_applescript(book_name: str, num_pages: int, page_direction: str) -> Non
         content,
     )
 
-    # DEFAULT_PAGES
-    content = re.sub(
-        r'property DEFAULT_PAGES : \d+',
-        f'property DEFAULT_PAGES : {num_pages}',
-        content,
-    )
+    # DEFAULT_PAGES（指定がある場合のみ更新）
+    if num_pages is not None:
+        content = re.sub(
+            r'property DEFAULT_PAGES : \d+',
+            f'property DEFAULT_PAGES : {num_pages}',
+            content,
+        )
 
     # pagedir（ページ送り方向）
     page_const = 'PAGE_LEFT' if page_direction == 'left' else 'PAGE_RIGHT'
@@ -55,9 +56,14 @@ def edit_applescript(book_name: str, num_pages: int, page_direction: str) -> Non
     )
 
     _write_applescript(content)
+
+    # 現在のページ数を読み取って表示
+    current_pages_match = re.search(r'property DEFAULT_PAGES : (\d+)', content)
+    current_pages = current_pages_match.group(1) if current_pages_match else '(不明)'
+
     print(f'[OK] screenshot.applescript を更新しました')
     print(f'     書籍名: {book_name}')
-    print(f'     ページ数: {num_pages}')
+    print(f'     ページ数: {current_pages}（{"指定値" if num_pages is not None else "既存の設定値を維持"}）')
     print(f'     ページ送り: {"左（←キー）" if page_direction == "left" else "右（→キー）"}')
 
 
@@ -94,14 +100,14 @@ def run_pdf_split(input_pdf: str, output_dir: str, max_size_mb: float) -> list[s
     return parts
 
 
-def prompt(message: str, default: str = '') -> str:
+def prompt(message: str, default: str = '', allow_empty: bool = False) -> str:
     if default:
         answer = input(f'{message} [{default}]: ').strip()
         return answer if answer else default
     else:
         while True:
             answer = input(f'{message}: ').strip()
-            if answer:
+            if answer or allow_empty:
                 return answer
             print('  入力が必要です。')
 
@@ -115,12 +121,16 @@ def main() -> None:
     print('\n【Step 1】書籍情報を入力してください\n')
 
     book_name = prompt('書籍名（保存ディレクトリ名になります）')
-    num_pages_str = prompt('ページ数（スクリーンショットの枚数）')
-    try:
-        num_pages = int(num_pages_str)
-    except ValueError:
-        print('[ERROR] ページ数は整数で入力してください')
-        sys.exit(1)
+    num_pages_str = prompt('ページ数（空のままEnterで既存設定値を維持）', default='', allow_empty=True)
+    if num_pages_str:
+        try:
+            num_pages: int | None = int(num_pages_str)
+        except ValueError:
+            print('[ERROR] ページ数は整数で入力してください')
+            sys.exit(1)
+    else:
+        num_pages = None
+        print('  → ページ数は AppleScript の既存設定値を維持します（最終ページで手動停止してください）')
 
     direction_input = prompt('ページ送り方向 (left / right)', default='left')
     if direction_input not in ('left', 'right'):
@@ -146,7 +156,7 @@ def main() -> None:
 
     # --- Step 2: AppleScript を編集 ---
     print('\n【Step 2】AppleScript を編集します\n')
-    edit_applescript(book_name, num_pages, direction_input)
+    edit_applescript(book_name, direction_input, num_pages)
 
     # --- Step 3: ユーザーにスクリーンショット実行を促す ---
     print('\n【Step 3】スクリーンショットを撮影してください\n')
@@ -156,10 +166,13 @@ def main() -> None:
     print()
     print(f'     osascript {_APPLESCRIPT_PATH}')
     print()
-    print('  3. スクリーンショットが完了するまで待つ')
+    if num_pages is None:
+        print('  3. 最終ページに到達したら Ctrl+C でスクリプトを手動停止する')
+    else:
+        print(f'  3. {num_pages} ページ分のスクリーンショットが完了するまで待つ')
     print(f'     （{save_dir} に p001.png, p002.png, ... が保存されます）')
     print()
-    input('  完了したら Enter を押してください...')
+    input('  停止・完了したら Enter を押してください...')
 
     # 保存先ディレクトリの存在確認
     if not os.path.isdir(save_dir):

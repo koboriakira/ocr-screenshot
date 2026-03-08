@@ -1,5 +1,5 @@
 -- 保存先ディレクトリ（共通部分とサブディレクトリに分割）
-property DEFAULT_SUBDIR : "みんなが欲しかった！FPの教科書3級 2025-2026年版"
+property DEFAULT_SUBDIR : "情報処理教科書_ITストラテジスト"
 property DEFAULT_BASEDIR : "/Users/koboriakira/Documents/KindleOCR"
 
 -- めくり方向
@@ -49,11 +49,11 @@ repeat with i from spage to pages
 	else
 		set dp to numText
 	end if
-
+	
 	set spath to (savepath & "p" & dp & ".png")
-
+	
 	do shell script "screencapture " & quoted form of spath
-
+	
 	if cropx is not 0 and cropy is not 0 then
 		if resizew is not 0 then
 			do shell script "sips -c " & cropy & " " & cropx & " --resampleWidth " & resizew & " " & quoted form of spath & " --out " & quoted form of spath
@@ -61,11 +61,11 @@ repeat with i from spage to pages
 			do shell script "sips -c " & cropy & " " & cropx & " " & quoted form of spath & " --out " & quoted form of spath
 		end if
 	end if
-
+	
 	tell application "System Events"
 		keystroke keychar
 	end tell
-
+	
 	delay pausetime
 end repeat
 
