@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 pillow = "*"
-pytesseract = "*"
 PyPDF2 = "*"
 tkeasygui = "*"
 pyinstaller = "*"

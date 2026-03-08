@@ -10,10 +10,17 @@ import tempfile
 from pathlib import Path
 
 from PIL import Image
-import pytesseract
+
+try:
+    import pytesseract
+    _TESSERACT_AVAILABLE = True
+except ImportError:
+    _TESSERACT_AVAILABLE = False
 
 
 def run_tesseract(image_path: Path) -> str:
+    if not _TESSERACT_AVAILABLE:
+        return "[スキップ] pytesseract がインストールされていません"
     try:
         return pytesseract.image_to_string(Image.open(image_path), lang='jpn+eng')
     except Exception as e:

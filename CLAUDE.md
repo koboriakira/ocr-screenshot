@@ -13,9 +13,22 @@ OCR-enabled image-to-PDF conversion and merge tool with Japanese and English OCR
 pipenv install
 ```
 
+### ndlocr-lite Setup (required, run once)
+```bash
+git clone https://github.com/ndl-lab/ndlocr-lite
+cd ndlocr-lite && pip install -r requirements.txt && cd ..
+```
+
 ### Running the Tool
 ```bash
-# OCR and PDF merge (command line)
+# OCR and PDF merge (command line) — uses ./ndlocr-lite/src by default
+pipenv run python ocr_merge.py -i <image_directory> -o <output.pdf>
+
+# Specify ndlocr-lite/src explicitly
+pipenv run python ocr_merge.py -i <image_directory> -o <output.pdf> --ndlocr-src ./ndlocr-lite/src
+
+# Or set via environment variable
+export NDLOCR_LITE_SRC=./ndlocr-lite/src
 pipenv run python ocr_merge.py -i <image_directory> -o <output.pdf>
 
 # PDF split by size (command line)
@@ -34,7 +47,7 @@ pipenv run pyinstaller --onefile --windowed pdf_split_gui.py
 
 ### OCR Comparison Tool
 ```bash
-# Compare pytesseract vs ndlocr-lite on a single image
+# Compare pytesseract (optional) vs ndlocr-lite on a single image
 pipenv run python compare_ocr.py -i <image.jpg> --ndlocr-src ./ndlocr-lite/src
 
 # Compare all images in a directory
@@ -42,16 +55,7 @@ pipenv run python compare_ocr.py -d <image_directory> --ndlocr-src ./ndlocr-lite
 
 # Output side-by-side HTML
 pipenv run python compare_ocr.py -i <image.jpg> --ndlocr-src ./ndlocr-lite/src --output result.html
-
-# ndlocr-lite setup (run once)
-# git clone https://github.com/ndl-lab/ndlocr-lite
-# cd ndlocr-lite && pip install -r requirements.txt && cd ..
 ```
-
-### External Dependencies
-- Tesseract OCR must be installed separately:
-  - macOS: `brew install tesseract tesseract-lang`
-  - Linux: `sudo apt install tesseract-ocr libtesseract-dev tesseract-ocr-jpn`
 
 ## Architecture
 
@@ -59,9 +63,10 @@ pipenv run python compare_ocr.py -i <image.jpg> --ndlocr-src ./ndlocr-lite/src -
 
 1. **ocr_merge.py**: Core OCR and PDF merge logic
    - Image file discovery (JPG/JPEG/PNG) with alphabetical sort
-   - OCR via pytesseract (`jpn+eng`) → individual PDF per image → merged with PyPDF2.PdfMerger
-   - `auto_rotate_image()` exists but is **intentionally disabled** in `image_to_pdf_with_ocr()` (the `rotate` arg is ignored)
-   - `--no-rotate` flag is accepted but has no effect
+   - OCR via ndlocr-lite (subprocess call to `ocr.py`) → JSON result → reportlab で Searchable PDF 生成 → merged with PyPDF2.PdfMerger
+   - 起動時に ndlocr-lite の存在チェック（`ocr.py` がなければ即時エラー終了）
+   - `--ndlocr-src` 引数でパス指定可（省略時: 環境変数 `NDLOCR_LITE_SRC` → `./ndlocr-lite/src`）
+   - 不可視テキスト（renderMode=3）を画像上に重ねて Searchable PDF を実現
 
 2. **ocr_merge_gui.py**: TkEasyGUI wrapper for ocr_merge.py
    - Runs ocr_merge.py as subprocess with real-time stdout display via threading
@@ -88,6 +93,6 @@ pipenv run python compare_ocr.py -i <image.jpg> --ndlocr-src ./ndlocr-lite/src -
 ## Configuration Notes
 
 - Python 3.12 (specified in Pipfile)
-- OCR languages: `jpn+eng`
+- OCR engine: ndlocr-lite（国立国会図書館製、縦書き高精度）。pytesseract は廃止済み
 - `pdf_split.py` default max size: 25MB (CLI help text says 30 but code default is 25)
 - `screenshot.applescript` source file is Shift-JIS encoded; comments may appear garbled in UTF-8 editors
