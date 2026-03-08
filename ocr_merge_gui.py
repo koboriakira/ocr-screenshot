@@ -1,7 +1,10 @@
+import os
 import sys
 import subprocess
 import threading
 import TkEasyGUI as eg
+
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def run_ocr_merge(cmd, window, output_key):
     try:
@@ -58,7 +61,7 @@ def main():
     ]
     window = eg.Window('OCR実行ログ', layout)
 
-    cmd = [sys.executable, 'ocr_merge.py', '-i', input_dir, '-o', output_pdf]
+    cmd = [sys.executable, os.path.join(_SCRIPT_DIR, 'ocr_merge.py'), '-i', input_dir, '-o', output_pdf]
     thread = threading.Thread(target=run_ocr_merge, args=(cmd, window, '-OUTPUT-'), daemon=True)
     thread.start()
 

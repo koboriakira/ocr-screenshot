@@ -7,11 +7,12 @@ name = "pypi"
 pillow = "*"
 pytesseract = "*"
 PyPDF2 = "*"
-opencv-python = "*"
 tkeasygui = "*"
 pyinstaller = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-mock = "*"
 
 [requires]
 python_version = "3.12"

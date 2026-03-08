@@ -1,7 +1,10 @@
+import os
 import sys
 import subprocess
 import threading
 import TkEasyGUI as eg
+
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def run_pdf_split(cmd, window, output_key):
@@ -59,7 +62,7 @@ def main():
         eg.popup_error('出力ディレクトリが選択されていません')
         return
     if not max_size:
-        max_size = "30"
+        max_size = "25"
 
     try:
         max_size_float = float(max_size)
@@ -78,7 +81,7 @@ def main():
     ]
     window = eg.Window('PDF分割実行ログ', layout)
 
-    cmd = [sys.executable, 'pdf_split.py', '-i', input_pdf, '-o', output_dir, '-s', str(max_size_float)]
+    cmd = [sys.executable, os.path.join(_SCRIPT_DIR, 'pdf_split.py'), '-i', input_pdf, '-o', output_dir, '-s', str(max_size_float)]
     thread = threading.Thread(target=run_pdf_split, args=(cmd, window, '-OUTPUT-'), daemon=True)
     thread.start()
 
