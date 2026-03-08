@@ -40,7 +40,13 @@ def _resolve_ndlocr_src(ndlocr_src: str | None) -> Path:
     return default.resolve()
 
 
-def image_to_pdf_with_ocr(image_path: str, pdf_path: str, ndlocr_src: Path) -> None:
+def image_to_pdf_with_ocr(
+    image_path: str,
+    pdf_path: str,
+    ndlocr_src: Path,
+    scale: float = 1.0,
+    jpeg_quality: int | None = None,
+) -> None:
     """ndlocr-lite で OCR し、searchable PDF を生成する"""
     ocr_py = ndlocr_src / 'ocr.py'
     if not ocr_py.exists():
@@ -71,12 +77,26 @@ def image_to_pdf_with_ocr(image_path: str, pdf_path: str, ndlocr_src: Path) -> N
             ocr_data = json.load(f)
 
         img = Image.open(image_path)
-        img_w, img_h = img.size
+        orig_w, orig_h = img.size
+
+        # スケール・JPEG変換
+        if scale != 1.0 or jpeg_quality is not None:
+            if scale != 1.0:
+                new_w = int(orig_w * scale)
+                new_h = int(orig_h * scale)
+                img = img.resize((new_w, new_h), Image.LANCZOS)
+            if jpeg_quality is not None:
+                img = img.convert('RGB')
+            embed_image = img
+        else:
+            embed_image = img
+
+        img_w, img_h = embed_image.size
+        scale_x = img_w / orig_w
+        scale_y = img_h / orig_h
 
         c = canvas.Canvas(pdf_path, pagesize=(img_w, img_h))
-        c.drawImage(ImageReader(image_path), 0, 0, width=img_w, height=img_h)
-
-        c.setFont('HeiseiMin-W3', 12)
+        c.drawImage(ImageReader(embed_image), 0, 0, width=img_w, height=img_h)
 
         for block_list in ocr_data.get('contents', []):
             for item in block_list:
@@ -89,22 +109,21 @@ def image_to_pdf_with_ocr(image_path: str, pdf_path: str, ndlocr_src: Path) -> N
                 # boundingBox: [[x1,y1],[x1,y1+h],[x1+w,y1],[x1+w,y1+h]]
                 xs = [pt[0] for pt in bb]
                 ys = [pt[1] for pt in bb]
-                x1 = min(xs)
-                y1 = min(ys)
-                x2 = max(xs)
-                y2 = max(ys)
-                w = x2 - x1
+                x1 = min(xs) * scale_x
+                y1 = min(ys) * scale_y
+                x2 = max(xs) * scale_x
+                y2 = max(ys) * scale_y
                 h = y2 - y1
                 font_size = max(h, 4)
 
                 # PDF 座標は左下原点 (Y軸反転)
                 y_pdf = img_h - y1 - h
 
-                c.setFont('HeiseiMin-W3', font_size)
-                c.setFillColorRGB(0, 0, 0, alpha=0)
-                # renderMode=3 で不可視テキスト
-                c.setTextRenderMode(3)
-                c.drawString(x1, y_pdf, text)
+                tx = c.beginText(x1, y_pdf)
+                tx.setFont('HeiseiMin-W3', font_size)
+                tx.setTextRenderMode(3)  # 不可視テキスト
+                tx.textLine(text)
+                c.drawText(tx)
 
         c.save()
 
@@ -126,6 +145,18 @@ def main() -> None:
         '--ndlocr-src',
         default=None,
         help='ndlocr-lite/src のパス（省略時: 環境変数 NDLOCR_LITE_SRC → スクリプト隣の ./ndlocr-lite/src）',
+    )
+    parser.add_argument(
+        '--scale',
+        type=float,
+        default=1.0,
+        help='画像の縮小率（例: 0.5 で半分のサイズ。デフォルト: 1.0）',
+    )
+    parser.add_argument(
+        '--jpeg-quality',
+        type=int,
+        default=None,
+        help='JPEG圧縮品質 1-95（指定するとPNGをJPEGとして埋め込む。例: 85）',
     )
     args = parser.parse_args()
 
@@ -152,7 +183,7 @@ def main() -> None:
         for idx, img_path in enumerate(files):
             pdf_path = os.path.join(temp_dir, f'{idx:04d}.pdf')
             print(f'[{idx+1}/{total}] OCR処理中: {os.path.basename(img_path)}')
-            image_to_pdf_with_ocr(img_path, pdf_path, ndlocr_src)
+            image_to_pdf_with_ocr(img_path, pdf_path, ndlocr_src, scale=args.scale, jpeg_quality=args.jpeg_quality)
             print(f'[{idx+1}/{total}] 完了: {os.path.basename(img_path)}')
             pdf_paths.append(pdf_path)
         print('PDF結合中...')
