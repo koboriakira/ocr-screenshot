@@ -25,7 +25,30 @@ def find_image_files(directory: str) -> list[str]:
     for ext in exts:
         files.extend(glob.glob(os.path.join(directory, ext)))
     files.sort()
+    if not files:
+        # TCC等でディレクトリ列挙（readdir）だけが拒否される環境では glob が
+        # 例外を出さず0件を返す。個別ファイルへの直接アクセスは通るため、
+        # screenshot.applescript の命名規則 p001, p002, ... を前提に連番で拾う
+        files = find_sequential_page_files(directory)
     return files
+
+
+def find_sequential_page_files(directory: str) -> list[str]:
+    """p001, p002, ... の連番ファイルを直接パス確認で収集する（ディレクトリ列挙を使わない）"""
+    found: list[str] = []
+    n = 1
+    while True:
+        hit = None
+        for ext in ('png', 'jpg', 'jpeg'):
+            candidate = os.path.join(directory, f'p{n:03d}.{ext}')
+            if os.path.isfile(candidate):
+                hit = candidate
+                break
+        if hit is None:
+            break
+        found.append(hit)
+        n += 1
+    return found
 
 
 def _resolve_ndlocr_src(ndlocr_src: str | None) -> Path:
@@ -107,14 +130,19 @@ def image_to_pdf_with_ocr(
                 if len(bb) < 4:
                     continue
                 # boundingBox: [[x1,y1],[x1,y1+h],[x1+w,y1],[x1+w,y1+h]]
+                # 縦書きの場合は文字列の長さ方向がy、文字の太さ方向がxになる
+                # （横書きはその逆）。font_sizeは常に短辺（=文字の太さ）から
+                # 求める。長辺をそのまま使うと文字列の長さをフォントサイズと
+                # 誤認し、実際の文字サイズの数倍に膨れ上がる
                 xs = [pt[0] for pt in bb]
                 ys = [pt[1] for pt in bb]
                 x1 = min(xs) * scale_x
                 y1 = min(ys) * scale_y
                 x2 = max(xs) * scale_x
                 y2 = max(ys) * scale_y
+                w = x2 - x1
                 h = y2 - y1
-                font_size = max(h, 4)
+                font_size = max(min(w, h), 4)
 
                 # PDF 座標は左下原点 (Y軸反転)
                 y_pdf = img_h - y1 - h
